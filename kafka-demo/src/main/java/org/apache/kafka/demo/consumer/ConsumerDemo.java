@@ -32,7 +32,7 @@ public class ConsumerDemo {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(1));
             for (ConsumerRecord<String, String> record : records) {
-                System.out.println(record);
+                System.out.println("=========> " + record);
             }
         }
     }

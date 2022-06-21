@@ -60,7 +60,15 @@ import static org.apache.kafka.common.record.RecordBatch.NO_PARTITION_LEADER_EPO
  */
 public class Metadata implements Closeable {
     private final Logger log;
+
+    /**
+     * retry.backoff.ms：用来设定两次重试之间的时间间隔，避免无效的频繁重试。默认值是100ms。
+     */
     private final long refreshBackoffMs;
+
+    /**
+     * metadata.max.age.ms：如果在这个时间内元数据没有更新的话，会被强制更新。默认值是300000ms。
+     */
     private final long metadataExpireMs;
     private int updateVersion;  // bumped on every metadata response
     private int requestVersion; // bumped on every new topic addition
