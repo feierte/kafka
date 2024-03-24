@@ -43,11 +43,14 @@ import org.apache.kafka.common.utils.Time;
  */
 public final class BufferPool {
 
+    // 内存池的总内存大小
     private final long totalMemory;
     private final int poolableSize;
     private final ReentrantLock lock;
+    // 内存池的底层数据结构，ByteBuffer 使用的是堆内存
     private final Deque<ByteBuffer> free;
     private final Deque<Condition> waiters;
+    // 内存池中可用内存大小
     private long availableMemory;
     private final Metrics metrics;
     private final Time time;

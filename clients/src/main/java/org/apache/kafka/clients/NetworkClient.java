@@ -255,8 +255,10 @@ public class NetworkClient implements KafkaClient {
      */
     @Override
     public List<ClientResponse> poll(long timeout, long now) {
+        // 封装了一个要拉取元数据的请求
         long metadataTimeout = metadataUpdater.maybeUpdate(now);
         try {
+            // 发送请求，进行复杂的网络 IO 操作
             this.selector.poll(Utils.min(timeout, metadataTimeout, requestTimeoutMs));
         } catch (IOException e) {
             log.error("Unexpected error during I/O", e);
@@ -266,6 +268,7 @@ public class NetworkClient implements KafkaClient {
         long updatedNow = this.time.milliseconds();
         List<ClientResponse> responses = new ArrayList<>();
         handleCompletedSends(responses, updatedNow);
+        // 处理响应
         handleCompletedReceives(responses, updatedNow);
         handleDisconnections(responses, updatedNow);
         handleConnections();
@@ -592,6 +595,7 @@ public class NetworkClient implements KafkaClient {
 
         private void handleResponse(RequestHeader header, Struct body, long now) {
             this.metadataFetchInProgress = false;
+            // kafka 服务端响应的是一个二进制数据，所以 producer 需要对二进制数据进行解析
             MetadataResponse response = new MetadataResponse(body);
             Cluster cluster = response.cluster();
             // check if any topics metadata failed to get updated
@@ -629,12 +633,16 @@ public class NetworkClient implements KafkaClient {
             }
             String nodeConnectionId = node.idString();
 
+            // 判断网络连接是否建立好
             if (canSendRequest(nodeConnectionId)) {
                 this.metadataFetchInProgress = true;
                 MetadataRequest metadataRequest;
                 if (metadata.needMetadataForAllTopics())
+                    // 封装请求，获取所有 topics 的元数据请求
                     metadataRequest = MetadataRequest.allTopics();
                 else
+                    // 默认走的是这里分支
+                    // 封装请求，获取 producer 发送数据的 topic 的元数据的请求
                     metadataRequest = new MetadataRequest(new ArrayList<>(metadata.topics()));
                 ClientRequest clientRequest = request(now, nodeConnectionId, metadataRequest);
                 log.debug("Sending metadata request {} to node {}", metadataRequest, node.id());

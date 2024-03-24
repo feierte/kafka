@@ -30,7 +30,9 @@ import java.util.Set;
 public final class Cluster {
 
     private final boolean isBootstrapConfigured;
+    // 存放 kafka 集群结点信息
     private final List<Node> nodes;
+    // 没有授权的 topics
     private final Set<String> unauthorizedTopics;
     private final Set<String> internalTopics;
     private final Map<TopicPartition, PartitionInfo> partitionsByTopicPartition;

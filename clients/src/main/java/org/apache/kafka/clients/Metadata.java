@@ -50,12 +50,19 @@ public final class Metadata {
     public static final long TOPIC_EXPIRY_MS = 5 * 60 * 1000;
     private static final long TOPIC_EXPIRY_NEEDS_UPDATE = -1L;
 
+    // 两次向 kafka 集群请求更新元数据之间的最小时间间隔，默认值是 100 ms，目的是减少网络压力
     private final long refreshBackoffMs;
+    // 元数据过期时间，即多久更新一次元数据，默认值：5 min
     private final long metadataExpireMs;
+    // 对于 producer 端来说，元数据是有版本号的，每次更新元数据，都会更新版本号（递增）
     private int version;
+    // 最近一次更新元数据的时间
     private long lastRefreshMs;
+    // 最新一次成功更新元数据的时间
     private long lastSuccessfulRefreshMs;
+    // 存放 kafka 集群的元数据
     private Cluster cluster;
+    // 标识，用来判断是否更新元数据的标识之一
     private boolean needUpdate;
     /* Topics with expiry time */
     private final Map<String, Long> topics;
@@ -200,7 +207,7 @@ public final class Metadata {
         this.lastRefreshMs = now;
         this.lastSuccessfulRefreshMs = now;
         this.version += 1;
-
+        // topicExpiryEnabled 默认值是 true
         if (topicExpiryEnabled) {
             // Handle expiry of topics from the metadata refresh set.
             for (Iterator<Map.Entry<String, Long>> it = topics.entrySet().iterator(); it.hasNext(); ) {
@@ -220,6 +227,7 @@ public final class Metadata {
 
         String previousClusterId = cluster.clusterResource().clusterId();
 
+        // needMetadataForAllTopics 默认值是 false
         if (this.needMetadataForAllTopics) {
             // the listener may change the interested topics, which could cause another metadata refresh.
             // If we have already fetched all topics, however, another fetch should be unnecessary.

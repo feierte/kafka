@@ -443,8 +443,10 @@ public class KafkaProducer<K, V> implements Producer<K, V> {
         TopicPartition tp = null;
         try {
             // first make sure the metadata for the topic is available
+            // 同步等待获取 kafka 服务端元数据
             ClusterAndWaitTime clusterAndWaitTime = waitOnMetadata(record.topic(), record.partition(), maxBlockTimeMs);
             long remainingWaitMs = Math.max(0, maxBlockTimeMs - clusterAndWaitTime.waitedOnMetadataMs);
+            // 更新 kafka 集群的元数据
             Cluster cluster = clusterAndWaitTime.cluster;
             byte[] serializedKey;
             try {

@@ -62,6 +62,7 @@ public final class RecordAccumulator {
     private volatile boolean closed;
     private final AtomicInteger flushesInProgress;
     private final AtomicInteger appendsInProgress;
+    // RecordBatch 存储数据的大小，默认值：16KB
     private final int batchSize;
     private final CompressionType compression;
     private final long lingerMs;
@@ -176,6 +177,9 @@ public final class RecordAccumulator {
             }
 
             // we don't have an in-progress record batch try to allocate a new batch
+            // 取默认批次值和消息大小的最大值
+            // 这里需要注意下：如果每次消息大小都大于默认的批次大小，那么 producer 就会来一条发送一条，达不到攒成一批再发送的效果，
+            // 所以生产实践中，按照实际消息大小值设置默认批次大小值，使能够达到攒批再发送效果
             int size = Math.max(this.batchSize, Records.LOG_OVERHEAD + Record.recordSize(key, value));
             log.trace("Allocating a new {} byte message buffer for topic {} partition {}", size, tp.topic(), tp.partition());
             ByteBuffer buffer = free.allocate(size, maxTimeToBlock);

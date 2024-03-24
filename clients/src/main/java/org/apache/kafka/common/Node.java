@@ -19,6 +19,7 @@ public class Node {
 
     private static final Node NO_NODE = new Node(-1, "", -1);
 
+    // 节点的 id，即 kafka 配置文件中 broker.id 指定的编号
     private final int id;
     private final String idString;
     private final String host;
